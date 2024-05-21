@@ -7,7 +7,6 @@ from math import sqrt
 class Cotacao(QWidget):
     def __init__(self):
         super().__init__()
-
         self.initUI()
 
     def initUI(self):
@@ -156,6 +155,10 @@ class Cotacao(QWidget):
         gridLayout.addWidget(self.buscarButton, 1, 0, 1, 2)
         self.buscarButton.clicked.connect(self.buscarAcao)
 
+        self.buscarFiiButton = QPushButton("Buscar FII")
+        gridLayout.addWidget(self.buscarFiiButton, 2, 0, 1, 2)
+        self.buscarFiiButton.clicked.connect(self.buscarFii)
+
         widget.setLayout(gridLayout)
         return widget
 
@@ -255,6 +258,12 @@ class Cotacao(QWidget):
             url = f"https://investidor10.com.br/acoes/{nome}"
             webbrowser.get().open_new_tab(url)
 
+    def buscarFii(self):
+        nome = self.nomeBuscaEdit.text().strip().replace(" ", "-").lower()
+        if nome:
+            url = f"https://investidor10.com.br/fiis/{nome}"
+            webbrowser.get().open_new_tab(url)
+
     def calcularSimuladorGanho(self):
         nome = self.nomeSimuladorEdit.text()
         try:
@@ -272,7 +281,7 @@ class Cotacao(QWidget):
             mensagem = f"O ganho mensal da cota {nome} é de R$ {ganho_por_periodo:.2f}\n"
             mensagem += f"O ganho anual é de R$ {ganho_anual:.2f}"
         else:  # Trimestral
-            ganho_anual = ganho_por_periodo * 3
+            ganho_anual = ganho_por_periodo * 4
             mensagem = f"O ganho trimestral da cota {nome} é de R$ {ganho_por_periodo:.2f}\n"
             mensagem += f"O ganho anual é de R$ {ganho_anual:.2f}"
 
