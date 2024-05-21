@@ -19,7 +19,7 @@ class Cotacao(QWidget):
         tabWidget = QTabWidget()
         tabWidget.addTab(self.createPrecoJustoTab(), "Preço Justo")
         tabWidget.addTab(self.createTetoPorAcaoTab(), "Teto por Ação")
-        tabWidget.addTab(self.createBuscarAcaoTab(), "Buscar Ação")
+        tabWidget.addTab(self.createBuscarAcaoTab(), "Buscar Ação/FII")
         tabWidget.addTab(self.createSimuladorGanhoTab(), "Simulador de Ganhos")
 
         layout = QVBoxLayout()
@@ -145,7 +145,7 @@ class Cotacao(QWidget):
         gridLayout = QGridLayout()
         gridLayout.setSpacing(10)
 
-        self.nomeBuscaLabel = QLabel("Nome da Ação:")
+        self.nomeBuscaLabel = QLabel("Nome da Ação/FII:")
         gridLayout.addWidget(self.nomeBuscaLabel, 0, 0)
 
         self.nomeBuscaEdit = QLineEdit()
@@ -281,7 +281,7 @@ class Cotacao(QWidget):
             mensagem = f"O ganho mensal da cota {nome} é de R$ {ganho_por_periodo:.2f}\n"
             mensagem += f"O ganho anual é de R$ {ganho_anual:.2f}"
         else:  # Trimestral
-            ganho_anual = ganho_por_periodo * 4
+            ganho_anual = ganho_por_periodo * 3
             mensagem = f"O ganho trimestral da cota {nome} é de R$ {ganho_por_periodo:.2f}\n"
             mensagem += f"O ganho anual é de R$ {ganho_anual:.2f}"
 
