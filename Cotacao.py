@@ -1,6 +1,7 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QGridLayout, QTabWidget
-from PyQt5.QtGui import QColor, QFont, QIcon
+import webbrowser
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QGridLayout, QTabWidget, QComboBox
+from PyQt5.QtGui import QColor, QIcon
 from math import sqrt
 
 class Cotacao(QWidget):
@@ -19,6 +20,8 @@ class Cotacao(QWidget):
         tabWidget = QTabWidget()
         tabWidget.addTab(self.createPrecoJustoTab(), "Preço Justo")
         tabWidget.addTab(self.createTetoPorAcaoTab(), "Teto por Ação")
+        tabWidget.addTab(self.createBuscarAcaoTab(), "Buscar Ação")
+        tabWidget.addTab(self.createSimuladorGanhoTab(), "Simulador de Ganhos")
 
         layout = QVBoxLayout()
         layout.addWidget(tabWidget)
@@ -51,6 +54,12 @@ class Cotacao(QWidget):
             QLabel#resultadoLabel {
                 font-size: 14px;
                 font-weight: bold;
+            }
+            QComboBox{
+                font-size: 12px;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;     
             }
         """)
 
@@ -116,7 +125,7 @@ class Cotacao(QWidget):
         self.pvpEdit = QLineEdit()
         gridLayout.addWidget(self.pvpEdit, 2, 1)
 
-        self.dividendosLabel = QLabel("Dividendos pagos dos Últimos 6 Anos(separado por vírgula):")
+        self.dividendosLabel = QLabel("Dividendos pagos dos Últimos 6 Anos (separado por vírgula):")
         gridLayout.addWidget(self.dividendosLabel, 3, 0)
 
         self.dividendosEdit = QLineEdit()
@@ -128,6 +137,64 @@ class Cotacao(QWidget):
 
         self.resultadoTetoLabel = QLabel("")
         gridLayout.addWidget(self.resultadoTetoLabel, 5, 0, 1, 2)
+
+        widget.setLayout(gridLayout)
+        return widget
+
+    def createBuscarAcaoTab(self):
+        widget = QWidget()
+        gridLayout = QGridLayout()
+        gridLayout.setSpacing(10)
+
+        self.nomeBuscaLabel = QLabel("Nome da Ação:")
+        gridLayout.addWidget(self.nomeBuscaLabel, 0, 0)
+
+        self.nomeBuscaEdit = QLineEdit()
+        gridLayout.addWidget(self.nomeBuscaEdit, 0, 1)
+
+        self.buscarButton = QPushButton("Buscar Ação")
+        gridLayout.addWidget(self.buscarButton, 1, 0, 1, 2)
+        self.buscarButton.clicked.connect(self.buscarAcao)
+
+        widget.setLayout(gridLayout)
+        return widget
+
+    def createSimuladorGanhoTab(self):
+        widget = QWidget()
+        gridLayout = QGridLayout()
+        gridLayout.setSpacing(10)
+
+        self.nomeSimuladorLabel = QLabel("Nome da Ação:")
+        gridLayout.addWidget(self.nomeSimuladorLabel, 0, 0)
+
+        self.nomeSimuladorEdit = QLineEdit()
+        gridLayout.addWidget(self.nomeSimuladorEdit, 0, 1)
+
+        self.dividendoPorAcaoLabel = QLabel("Dividendos por Ação (R$):")
+        gridLayout.addWidget(self.dividendoPorAcaoLabel, 1, 0)
+
+        self.dividendoPorAcaoEdit = QLineEdit()
+        gridLayout.addWidget(self.dividendoPorAcaoEdit, 1, 1)
+
+        self.quantidadeCotasLabel = QLabel("Quantidade de Cotas:")
+        gridLayout.addWidget(self.quantidadeCotasLabel, 2, 0)
+
+        self.quantidadeCotasEdit = QLineEdit()
+        gridLayout.addWidget(self.quantidadeCotasEdit, 2, 1)
+
+        self.frequenciaLabel = QLabel("Frequência dos Dividendos:")
+        gridLayout.addWidget(self.frequenciaLabel, 3, 0)
+
+        self.frequenciaCombo = QComboBox()
+        self.frequenciaCombo.addItems(["Mensal", "Trimestral"])
+        gridLayout.addWidget(self.frequenciaCombo, 3, 1)
+
+        self.calcularSimuladorButton = QPushButton("Calcular Ganhos")
+        gridLayout.addWidget(self.calcularSimuladorButton, 4, 0, 1, 2)
+        self.calcularSimuladorButton.clicked.connect(self.calcularSimuladorGanho)
+
+        self.resultadoSimuladorLabel = QLabel("")
+        gridLayout.addWidget(self.resultadoSimuladorLabel, 5, 0, 1, 2)
 
         widget.setLayout(gridLayout)
         return widget
@@ -181,6 +248,36 @@ class Cotacao(QWidget):
 
         self.resultadoTetoLabel.setText(mensagem)
         self.resultadoTetoLabel.setStyleSheet(f"color: {cor.name()}")
+
+    def buscarAcao(self):
+        nome = self.nomeBuscaEdit.text().strip().replace(" ", "-").lower()
+        if nome:
+            url = f"https://investidor10.com.br/acoes/{nome}"
+            webbrowser.get().open_new_tab(url)
+
+    def calcularSimuladorGanho(self):
+        nome = self.nomeSimuladorEdit.text()
+        try:
+            dividendo_por_acao = float(self.dividendoPorAcaoEdit.text())
+            quantidade_cotas = int(self.quantidadeCotasEdit.text())
+            frequencia = self.frequenciaCombo.currentText()
+        except ValueError:
+            self.resultadoSimuladorLabel.setText("Erro: valores inválidos")
+            return
+
+        ganho_por_periodo = dividendo_por_acao * quantidade_cotas
+
+        if frequencia == "Mensal":
+            ganho_anual = ganho_por_periodo * 12
+            mensagem = f"O ganho mensal da cota {nome} é de R$ {ganho_por_periodo:.2f}\n"
+            mensagem += f"O ganho anual é de R$ {ganho_anual:.2f}"
+        else:  # Trimestral
+            ganho_anual = ganho_por_periodo * 3
+            mensagem = f"O ganho trimestral da cota {nome} é de R$ {ganho_por_periodo:.2f}\n"
+            mensagem += f"O ganho anual é de R$ {ganho_anual:.2f}"
+
+        self.resultadoSimuladorLabel.setText(mensagem)
+        self.resultadoSimuladorLabel.setStyleSheet("color: green")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
