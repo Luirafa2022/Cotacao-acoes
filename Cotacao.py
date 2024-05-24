@@ -77,8 +77,8 @@ class Cotacao(QWidget):
 
         self.setStyleSheet("""
             QListWidget {
-                border: 1px solid #BBB;
-                border-radius: 5px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
             }
             QWidget {
                 background-color: #f0f0f0;
